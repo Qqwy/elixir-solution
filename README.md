@@ -45,11 +45,11 @@ Solution also exposes versions of these that take a 'minimum-length' as second a
 but will expand `ok()`, `error()` and `okerror()`macros to the left side of `->`.
 
 ```elixir
-iex> scase {:ok, 10} do
-...>  ok() -> "Yay!"
-...>  _ -> "Failure"
-...>  end
-"Yay!"
+ scase {:ok, 10} do
+  ok() -> "Yay!"
+  _ -> "Failure"
+  end
+#=> "Yay!"
 ```
 
 
@@ -57,12 +57,12 @@ You can also pass arguments to `ok()`, `error()` or `okerror()` which will then 
 to be used inside the case expression:
 
 ```elixir
-iex> scase {:ok, "foo", 42} do
-...> ok(res, extra) ->
-...>      "result: \#{res}, extra: \#{extra}"
-...>      _ -> "Failure"
-...>    end
-"result: foo, extra: 42"
+ scase {:ok, "foo", 42} do
+ ok(res, extra) ->
+      "result: \#{res}, extra: \#{extra}"
+      _ -> "Failure"
+    end
+#=> "result: foo, extra: 42"
 ```
 
 Note that for `ok()` and `error()`, the first argument will match the first element after the `:ok` or `:error` tag.
@@ -75,15 +75,15 @@ but will expand `ok()`, `error()` and `okerror()` macros to the left side of `<-
 
 
 ```elixir
-iex> x = {:ok, 10}
-iex> y = {:ok, 33}
-iex> swith ok(res) <- x,
-...>       ok(res2) <- y do
-...>      "We have: \#{res} \#{res2}"
-...>    else
-...>      _ -> "Failure"
-...>  end
-"We have: 10 33"
+ x = {:ok, 10}
+ y = {:ok, 33}
+ swith ok(res) <- x,
+       ok(res2) <- y do
+      "We have: \#{res} \#{res2}"
+    else
+      _ -> "Failure"
+  end
+#=> "We have: 10 33"
 ```
 
 
@@ -91,18 +91,18 @@ You can also pass arguments to `ok()`, `error()` or `okerror()` which will then 
 to be used inside the rest of the `swith`-expression:
 
 ```elixir
-iex> x = {:ok, 10}
-iex> y = {:error, 33}
-iex> z = {:ok, %{a: 42}}
-iex> swith ok(res) <- x,
-...>       error(res2) <- y,
-...>       okerror(tag, metamap) <- z,
-...>     %{a: val} = metamap do
-...>       "We have: \#{res} \#{res2} \#{tag} \#{val}"
-...>   else
-...>       _ -> "Failure"
-...>   end
-"We have: 10 33 ok 42"
+ x = {:ok, 10}
+ y = {:error, 33}
+ z = {:ok, %{a: 42}}
+ swith ok(res) <- x,
+       error(res2) <- y,
+       okerror(tag, metamap) <- z,
+     %{a: val} = metamap do
+       "We have: \#{res} \#{res2} \#{tag} \#{val}"
+   else
+       _ -> "Failure"
+   end
+#=> "We have: 10 33 ok 42"
 ```
 
 Note that for `ok()` and `error()`, the first argument will match the first element after the `:ok` or `:error` tag.
