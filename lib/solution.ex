@@ -11,16 +11,16 @@ defmodule Solution do
   - `{:ok, _, _}`
   -  or a longer tuple where the first element is the atom `:ok`
 
-  iex> is_ok(:ok)
-  true
-  iex> is_ok({:ok, 42})
-  true
-  iex> is_ok({:ok, "I", "have", "many", "elements"})
-  true
-  iex> is_ok(:asdf)
-  false
-  iex> is_ok({:error, "failure"})
-  false
+      iex> is_ok(:ok)
+      true
+      iex> is_ok({:ok, 42})
+      true
+      iex> is_ok({:ok, "I", "have", "many", "elements"})
+      true
+      iex> is_ok(:asdf)
+      false
+      iex> is_ok({:error, "failure"})
+      false
   """
   defguard is_ok(x) when x == :ok or (is_tuple(x) and tuple_size(x) > 1 and elem(x, 0) == :ok)
 
@@ -38,17 +38,17 @@ defmodule Solution do
   - `{:error, _, _}`
   -  or a longer tuple where the first element is the atom `:error`
 
-  iex> is_error(:error)
-  true
-  iex> is_error({:error, 42})
-  true
-  iex> is_error({:error, "I", "have", "many", "elements"})
-  true
-  iex> is_error(:asdf)
-  false
-  iex> is_error({:ok, "success!"})
-  iex> is_error(:undefined)
-  true
+      iex> is_error(:error)
+      true
+      iex> is_error({:error, 42})
+      true
+      iex> is_error({:error, "I", "have", "many", "elements"})
+      true
+      iex> is_error(:asdf)
+      false
+      iex> is_error({:ok, "success!"})
+      iex> is_error(:undefined)
+      true
   """
   defguard is_error(x) when x == :error or (is_tuple(x) and tuple_size(x) > 1 and elem(x, 0) == :error) or x == :undefined
 
@@ -60,18 +60,18 @@ defmodule Solution do
   @doc """
   Matches when either `is_ok(x)` or `is_error(x)` matches.
 
-  iex> is_okerror({:ok, "Yay!"})
-  true
-  iex> is_okerror({:error, "Nay"})
-  true
-  iex> is_okerror(false)
-  false
-  iex> is_okerror(:undefined)
-  true
-  iex> is_okerror({})
-  false
-  iex> is_okerror({:ok, "the", "quick", "brown", "fox"})
-  true
+      iex> is_okerror({:ok, "Yay!"})
+      true
+      iex> is_okerror({:error, "Nay"})
+      true
+      iex> is_okerror(false)
+      false
+      iex> is_okerror(:undefined)
+      true
+      iex> is_okerror({})
+      false
+      iex> is_okerror({:ok, "the", "quick", "brown", "fox"})
+      true
   """
   defguard is_okerror(x) when is_ok(x) or is_error(x)
 
@@ -102,7 +102,6 @@ defmodule Solution do
 
   # Expands to x when is_ok(x, min_length)
   # Used internally by `expand_match`
-
   defmacro __ok__(0) do
     quote do
       ok()
@@ -127,6 +126,7 @@ defmodule Solution do
 
   Has to be used inside the LHS of a `scase` or `swith` statement.
   """
+  # TODO do we keep this one for documentation purposes or shall we remove it?
   defmacro ok(res) do
     quote do
       {:ok, unquote(res)}
@@ -175,6 +175,7 @@ defmodule Solution do
 
   Has to be used inside the LHS of a `scase` or `swith` statement.
   """
+  # TODO do we keep this one for documentation purposes or shall we remove it?
   defmacro error(res) do
     quote do
       {:error, unquote(res)}
@@ -197,6 +198,7 @@ defmodule Solution do
      |> Macro.prewalk(&Macro.expand(&1, guard_env))
   end
 
+  # TODO do we keep this one for documentation purposes or shall we remove it?
   defmacro okerror(res) do
     quote do
       {tag, unquote(res)} when tag == :ok or tag == :error
@@ -225,7 +227,28 @@ defmodule Solution do
 
   @doc """
   Works like a normal `case`-statement,
-  but will expand macros to the left side of `->`.
+  but will expand `ok()`, `error()` and `okerror()`macros to the left side of `->`.
+
+      iex> scase {:ok, 10} do
+      ...>  ok() -> "Yay!"
+      ...>  _ -> "Failure"
+      ...>  end
+      "Yay!"
+
+
+  You can also pass arguments to `ok()`, `error()` or `okerror()` which will then be bound and available
+  to be used inside the case expression:
+
+      iex> scase {:ok, "foo", 42} do
+      ...> ok(res, extra) ->
+      ...>      "result: \#{res}, extra: \#{extra}"
+      ...>      _ -> "Failure"
+      ...>    end
+      "result: foo, extra: 42"
+
+  Note that for `ok()` and `error()`, the first argument will match the first element after the `:ok` or `:error` tag.
+  On the other hand, for `okerror()`, the first argument will match the tag `:ok` or `:error`.
+
   """
   defmacro scase(input, conditions) do
     guard_env = Map.put(__ENV__, :context, :guard)
@@ -235,49 +258,31 @@ defmodule Solution do
       |> Macro.prewalk(fn node ->
         case node do
           {:->, meta, [[lhs], rhs]} ->
-            # IO.inspect "Yay, we encountered: #{inspect {meta, lhs, rhs}}"
             {lhs, rhs_list} = expand_match(lhs, [rhs])
             rhs = {:__block__, [], rhs_list}
             node = {:->, meta, [[lhs], rhs]}
-            a = Macro.expand(node, guard_env)
-            # IO.inspect(Macro.to_string(a), label: "RESULTING NODE")
-
-            a
+            Macro.expand(node, guard_env)
           _ ->
             Macro.expand(node, guard_env)
         end
       end)
-
-    # IO.puts(Macro.to_string(res))
-
     res
   end
 
-  defp expand_match(lhs = {tag, meta, args}, rhs) when tag in [:ok, :error, :okerror] and is_list(args) do
+  defp expand_match({tag, meta, args}, rhs) when tag in [:ok, :error, :okerror] and is_list(args) do
     var = Macro.var(:latest_solution_match____, nil)
-    args_amount =
-      case Enum.count(args) do
-        0 ->
-          0
-        other ->
-          other + 1
-      end
-    elem_offset =
-      case tag do
-        :okerror -> 0
-        _ -> 1
-      end
+    args_amount = args_amount(args)
     prefixes =
       args
       |> Enum.with_index
       |> Enum.map(fn {arg, index} ->
-      full_index = index + elem_offset
+      full_index = index + elem_offset(tag)
         quote do
           unquote(arg) = elem(unquote(var), unquote(full_index))
         end
       end)
 
-      lhs = {:"__#{tag}__", meta, [args_amount + elem_offset - 1]}
+      lhs = {:"__#{tag}__", meta, [args_amount + elem_offset(tag) - 1]}
 
       {lhs, prefixes ++ rhs}
   end
@@ -286,10 +291,35 @@ defmodule Solution do
     {other, rhs}
   end
 
+  defp args_amount(args) do
+      case Enum.count(args) do
+        0 ->
+          0
+        other ->
+          other + 1
+      end
+  end
+
+  defp elem_offset(:okerror), do: 0
+  defp elem_offset(_), do: 1
+
 
   @doc """
   Works like a normal `with`-statement,
-  but will expand macros to the left side of `<-`.
+  but will expand `ok()`, `error()` and `okerror()` macros to the left side of `<-`.
+
+
+      iex> x = {:ok, 10}
+      iex> y = {:ok, 33}
+      iex> Solution.swith ok(res) <- x,
+      ...>    ok(res2) <- y do
+      ...>      "We have: \#{res} \#{res2}"
+      ...>    else
+      ...>      _ -> "Failure"
+      ...>  end
+      "We have: 10 33"
+
+
   """
   defmacro swith(statements, conditions)
   defmacro swith(statement, conditions) do
@@ -309,21 +339,16 @@ defmodule Solution do
   defp do_swith(statements, conditions) do
     guard_env = Map.put(__ENV__, :context, :guard)
 
-    IO.inspect(statements, label: :statements)
-    IO.inspect(conditions, label: :conditions)
 
     statements =
       statements
       |> Enum.flat_map(fn node ->
         case node do
             {:<-, meta, [lhs, rhs]} ->
-            IO.inspect("Wooh! We encountered: #{inspect {meta, lhs, rhs}}")
             {lhs, extra_statements} =
               expand_match(lhs, [])
             lhs = Macro.expand(lhs, guard_env)
             node = {:<-, meta, [lhs, rhs]}
-
-            IO.inspect(Macro.to_string(node), label: "RESULTING NODE")
 
             [node | extra_statements]
           _ ->
@@ -331,15 +356,8 @@ defmodule Solution do
         end
       end)
 
-    res =
-      quote do
-        with(unquote_splicing(statements), unquote(conditions))
-      end
-
-    IO.puts(Macro.to_string(res))
-
-    res
+    quote do
+      with(unquote_splicing(statements), unquote(conditions))
+    end
   end
 end
-
-
