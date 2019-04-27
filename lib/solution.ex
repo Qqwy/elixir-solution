@@ -268,22 +268,18 @@ defmodule Solution do
   defmacro scase(input, conditions) do
     guard_env = Map.put(__ENV__, :context, :guard)
 
-    res =
-      {:case, [], [input, conditions]}
-      |> Macro.prewalk(fn node ->
-        case node do
-          {:->, meta, [[lhs], rhs]} ->
-            {lhs, rhs_list} = expand_match(lhs, [rhs])
-            rhs = {:__block__, [], rhs_list}
-            node = {:->, meta, [[lhs], rhs]}
-            Macro.expand(node, guard_env)
-          _ ->
-            Macro.expand(node, guard_env)
-        end
-      end)
-
-    IO.puts(Macro.to_string(res))
-    res
+    {:case, [], [input, conditions]}
+    |> Macro.prewalk(fn node ->
+      case node do
+        {:->, meta, [[lhs], rhs]} ->
+          {lhs, rhs_list} = expand_match(lhs, [rhs])
+          rhs = {:__block__, [], rhs_list}
+        node = {:->, meta, [[lhs], rhs]}
+        Macro.expand(node, guard_env)
+        _ ->
+          Macro.expand(node, guard_env)
+      end
+    end)
   end
 
   defp expand_match({tag, meta, args}, rhs) when tag in [:ok, :error, :okerror] and is_list(args) do
@@ -391,11 +387,8 @@ defmodule Solution do
         end
       end)
 
-    res = quote do
+    quote do
       with(unquote_splicing(statements), unquote(conditions))
     end
-
-    IO.puts(Macro.to_string(res))
-    res
   end
 end
