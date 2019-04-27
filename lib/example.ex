@@ -3,7 +3,8 @@ defmodule Bar do
   import Solution
   def foo(x) do
     scase x do
-      ok() -> "Yay"
+      ok(res, res2) -> "Wooh! #{res}, #{res2}"
+      x when is_ok(x, 3) -> "Yay"
       _ -> "Fail"
     end
   end
