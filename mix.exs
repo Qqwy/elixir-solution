@@ -1,6 +1,8 @@
 defmodule Solution.MixProject do
   use Mix.Project
 
+  @source_url "https://github.com/Qqwy/elixir_solution"
+
   def project do
     [
       app: :solution,
@@ -50,5 +52,4 @@ defmodule Solution.MixProject do
       links: %{"GitHub" => @source_url}
     ]
   end
-
 end

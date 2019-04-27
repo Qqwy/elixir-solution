@@ -91,22 +91,18 @@ defmodule Solution do
   """
   defmacro ok() do
     guard_env = Map.put(__ENV__, :context, :guard)
-      {:when, [],
-       [
-         {:latest_solution_match____, [], nil},
-         {:is_ok, [context: Elixir, import: Solution],
-          [{:latest_solution_match____, [], nil}]}
-       ]}
-       |> Macro.prewalk(&Macro.expand(&1, guard_env))
+    {:when, [],
+     [
+       {:latest_solution_match____, [], nil},
+       {:is_ok, [context: Elixir, import: Solution],
+        [{:latest_solution_match____, [], nil}]}
+     ]}
+     |> Macro.prewalk(&Macro.expand(&1, guard_env))
+
   end
 
   # Expands to x when is_ok(x, min_length)
   # Used internally by `expand_match`
-  defmacro __ok__(0) do
-    quote do
-      ok()
-    end
-  end
   defmacro __ok__(min_length) do
     guard_env = Map.put(__ENV__, :context, :guard)
     {:when, [],
@@ -120,13 +116,11 @@ defmodule Solution do
 
 
   @doc """
-  Matches `{:ok, res}`.
-  `res` is then bound.
+  Matches `{:ok, res}` (as well as tuples with more elements). `res` is then bound.
   (See also `is_ok`)
 
   Has to be used inside the LHS of a `scase` or `swith` statement.
   """
-  # TODO do we keep this one for documentation purposes or shall we remove it?
   defmacro ok(res) do
     quote do
       {:ok, unquote(res)}
@@ -149,14 +143,21 @@ defmodule Solution do
      ]}
      |> Macro.prewalk(&Macro.expand(&1, guard_env))
   end
+  @doc """
+  Matches `{:error, res}` (as well as tuples with more elements). `res` is then bound.
+  (See also `is_error`)
+
+  Has to be used inside the LHS of a `scase` or `swith` statement.
+  """
+  defmacro error(res) do
+    quote do
+      {:error, unquote(res)}
+    end
+
+  end
 
   # Expands to x when is_error(x, min_length)
   # Used internally by `expand_match`
-  defmacro __error__(0) do
-    quote do
-      error()
-    end
-  end
   defmacro __error__(min_length) do
     guard_env = Map.put(__ENV__, :context, :guard)
     {:when, [],
@@ -183,6 +184,35 @@ defmodule Solution do
      ]}
      |> Macro.prewalk(&Macro.expand(&1, guard_env))
   end
+
+  @doc """
+  Matches any ok or error type. `tag` is then boudn to `:ok`, `:error` or `:undefined`.
+  (See also `is_okerror`)
+
+  Has to be used inside the LHS of a `scase` or `swith` statement.
+  """
+  defmacro okerror(tag) do
+    quote do
+      {unquote(tag), _} when unquote(tag) in [:ok, :error]
+    end
+  end
+
+  @doc """
+  Matches `{:ok, res}`, `{:error, res}` (as well as tuples with more elements). `tag` and `res` are bound.
+  (See also `is_okerror`)
+
+  `tag` is bound to the value `:ok` or `:error` depending on the tuple.
+  `res` is bound to what the second element might be.
+
+  Has to be used inside the LHS of a `scase` or `swith` statement.
+  """
+  defmacro okerror(tag, res) do
+    quote do
+      {unquote(tag), unquote(res)} when unquote(tag) in [:ok, :error]
+    end
+
+  end
+
 
   # Expands to x when is_okerror(x, min_length)
   # Used internally by `expand_match`
