@@ -1,3 +1,4 @@
+# Solution
 ![Solution](brand/logo_text.png)
 
 `Solution` is a library to help you with working with ok/error-tuples by exposing special matching macros.
