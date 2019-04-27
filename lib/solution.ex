@@ -320,6 +320,24 @@ defmodule Solution do
       "We have: 10 33"
 
 
+  You can also pass arguments to `ok()`, `error()` or `okerror()` which will then be bound and available
+  to be used inside the rest of the `swith`-expression:
+
+      iex> x = {:ok, 10}
+      iex> y = {:error, 33}
+      iex> z = {:ok, %{a: 42}}
+      iex>   Solution.swith ok(res) <- x,
+      ...>     error(res2) <- y,
+      ...>     okerror(tag, metamap) <- z,
+      ...>     %{a: val} = metamap do
+      ...>       "We have: \#{res} \#{res2} \#{tag} \#{val}"
+      ...>   else
+      ...>       _ -> "Failure"
+      ...>   end
+      "We have: 10 33 ok 42"
+
+  Note that for `ok()` and `error()`, the first argument will match the first element after the `:ok` or `:error` tag.
+  On the other hand, for `okerror()`, the first argument will match the tag `:ok` or `:error`.
   """
   defmacro swith(statements, conditions)
   defmacro swith(statement, conditions) do
