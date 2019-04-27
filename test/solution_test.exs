@@ -23,13 +23,13 @@ defmodule SolutionTest do
   end
 
   def okerror_generator do
-    StreamData.one_of([ok_generator, error_generator])
+    StreamData.one_of([ok_generator(), error_generator()])
   end
 
   describe "scase" do
 
     property "All ok-type tuples are accepted by ok()" do
-      check all okval <- ok_generator do
+      check all okval <- ok_generator() do
         res = scase okval do
           ok() -> true
           _ -> false
@@ -40,7 +40,7 @@ defmodule SolutionTest do
     end
 
     property "All error-type tuples are accepted by error()" do
-      check all errval <- error_generator do
+      check all errval <- error_generator() do
         res = scase errval do
           ok() -> false
           error() -> true
@@ -52,7 +52,7 @@ defmodule SolutionTest do
     end
 
     property "All okerror-type tuples are accepted by okerror()" do
-      check all okerrval <- okerror_generator do
+      check all okerrval <- okerror_generator() do
         res = scase okerrval do
           okerror() -> true
           _ -> false
@@ -66,7 +66,7 @@ defmodule SolutionTest do
   describe "swith" do
 
     property "All ok-type tuples are accepted by ok()" do
-      check all okval <- ok_generator do
+      check all okval <- ok_generator() do
         res = swith ok() <- okval do
             true
         else
@@ -78,7 +78,7 @@ defmodule SolutionTest do
     end
 
     property "All error-type tuples are accepted by error()" do
-      check all errval <- error_generator do
+      check all errval <- error_generator() do
         res = swith error() <- errval do
           true
         else
@@ -90,11 +90,11 @@ defmodule SolutionTest do
     end
 
     property "All okerror-type tuples are accepted by okerror()" do
-      check all okerrval <- okerror_generator do
+      check all okerrval <- okerror_generator() do
         res = swith okerror() <- okerrval do
           true
         else
-          _ -> false
+          res -> res
         end
 
         assert res == true

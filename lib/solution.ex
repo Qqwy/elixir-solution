@@ -81,7 +81,7 @@ defmodule Solution do
   Warning: Will _not_ match plain `:ok`, `:error` or `:undefined`!
   """
 
-  defguard is_okerror(x, n_elems) when (x in [:ok, :error, :undefined] and n_elems == 0) or (is_tuple(x) and tuple_size(x) >= n_elems and elem(x, 0) in [:ok, :error])
+  defguard is_okerror(x, n_elems) when is_ok(x, n_elems) or is_error(x, n_elems)
 
   @doc """
   Matches any ok datatype.
@@ -169,20 +169,6 @@ defmodule Solution do
   end
 
   @doc """
-  Matches `{:error, res}`.
-  `res` is then bound.
-  (See also `is_error`)
-
-  Has to be used inside the LHS of a `scase` or `swith` statement.
-  """
-  # TODO do we keep this one for documentation purposes or shall we remove it?
-  defmacro error(res) do
-    quote do
-      {:error, unquote(res)}
-    end
-  end
-
-  @doc """
   Matches any ok/error datatype.
 
   Has to be used inside the LHS of a `scase` or `swith` statement.
@@ -196,13 +182,6 @@ defmodule Solution do
         [{:latest_solution_match____, [], nil}]}
      ]}
      |> Macro.prewalk(&Macro.expand(&1, guard_env))
-  end
-
-  # TODO do we keep this one for documentation purposes or shall we remove it?
-  defmacro okerror(res) do
-    quote do
-      {tag, unquote(res)} when tag == :ok or tag == :error
-    end
   end
 
   # Expands to x when is_okerror(x, min_length)
@@ -266,6 +245,8 @@ defmodule Solution do
             Macro.expand(node, guard_env)
         end
       end)
+
+    IO.puts(Macro.to_string(res))
     res
   end
 
@@ -282,7 +263,7 @@ defmodule Solution do
         end
       end)
 
-      lhs = {:"__#{tag}__", meta, [args_amount + elem_offset(tag) - 1]}
+      lhs = {:"__#{tag}__", meta, [max(args_amount + elem_offset(tag) - 1, 0)]}
 
       {lhs, prefixes ++ rhs}
   end
@@ -311,7 +292,7 @@ defmodule Solution do
 
       iex> x = {:ok, 10}
       iex> y = {:ok, 33}
-      iex> Solution.swith ok(res) <- x,
+      iex> swith ok(res) <- x,
       ...>    ok(res2) <- y do
       ...>      "We have: \#{res} \#{res2}"
       ...>    else
@@ -326,7 +307,7 @@ defmodule Solution do
       iex> x = {:ok, 10}
       iex> y = {:error, 33}
       iex> z = {:ok, %{a: 42}}
-      iex>   Solution.swith ok(res) <- x,
+      iex> swith ok(res) <- x,
       ...>     error(res2) <- y,
       ...>     okerror(tag, metamap) <- z,
       ...>     %{a: val} = metamap do
@@ -374,8 +355,11 @@ defmodule Solution do
         end
       end)
 
-    quote do
+    res = quote do
       with(unquote_splicing(statements), unquote(conditions))
     end
+
+    IO.puts(Macro.to_string(res))
+    res
   end
 end
