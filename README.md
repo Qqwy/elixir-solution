@@ -21,7 +21,7 @@ end
 
 ## Examples
 
-The following example snippets pretend that you ran 
+The following example snippets assume that you run 
 ```elixir
 require Solution
 import Solution
