@@ -12,7 +12,7 @@ defmodule Solution do
   -  or a longer tuple where the first element is the atom `:ok`
   """
   defguard is_ok(x) when x == :ok or (is_tuple(x) and elem(x, 0) == :ok)
-  defguard is_ok(x, n_elems) when elem(x, 0) == :ok and tuple_size(x) >= n_elems
+  defguard is_ok(x, n_elems) when elem(x, 0) == :ok and tuple_size(x) > n_elems
 
   @doc """
   Matches when `x` is one of the following:
@@ -24,7 +24,7 @@ defmodule Solution do
   -  or a longer tuple where the first element is the atom `:error`
   """
   defguard is_error(x) when x == :error or (is_tuple(x) and elem(x, 0) == :error) or x == :undefined
-  defguard is_error(x, n_elems) when elem(x, 0) == :error and tuple_size(x) >= n_elems
+  defguard is_error(x, n_elems) when elem(x, 0) == :error and tuple_size(x) > n_elems
 
   @doc """
   Matches when either `is_ok(x)` or `is_error(x)` matches.
@@ -50,7 +50,13 @@ defmodule Solution do
   end
 
   # Expands to x when is_ok(x, min_length)
-  # Used internally by `expand_case_match`
+  # Used internally by `expand_match`
+
+  defmacro __ok__(0) do
+    quote do
+      ok()
+    end
+  end
   defmacro __ok__(min_length) do
     guard_env = Map.put(__ENV__, :context, :guard)
     {:when, [],
@@ -94,7 +100,12 @@ defmodule Solution do
   end
 
   # Expands to x when is_error(x, min_length)
-  # Used internally by `expand_case_match`
+  # Used internally by `expand_match`
+  defmacro __error__(0) do
+    quote do
+      error()
+    end
+  end
   defmacro __error__(min_length) do
     guard_env = Map.put(__ENV__, :context, :guard)
     {:when, [],
@@ -153,11 +164,12 @@ defmodule Solution do
       |> Macro.prewalk(fn node ->
         case node do
           {:->, meta, [[lhs], rhs]} ->
-            IO.inspect "Yay, we encountered: #{inspect {meta, lhs, rhs}}"
-            {lhs, rhs} = expand_case_match(lhs, rhs)
+            # IO.inspect "Yay, we encountered: #{inspect {meta, lhs, rhs}}"
+            {lhs, rhs_list} = expand_match(lhs, [rhs])
+            rhs = {:__block__, [], rhs_list}
             node = {:->, meta, [[lhs], rhs]}
             a = Macro.expand(node, guard_env)
-            IO.inspect(Macro.to_string(a), label: "RESULTING NODE")
+            # IO.inspect(Macro.to_string(a), label: "RESULTING NODE")
 
             a
           _ ->
@@ -165,14 +177,14 @@ defmodule Solution do
         end
       end)
 
-    IO.puts(Macro.to_string(res))
+    # IO.puts(Macro.to_string(res))
 
     res
   end
 
-  defp expand_case_match(lhs = {tag, meta, args}, rhs) when tag in [:ok, :error] do
+  defp expand_match(lhs = {tag, meta, args}, rhs) when tag in [:ok, :error] and is_list(args) do
     var = Macro.var(:latest_solution_match____, nil)
-    rhs =
+    prefixes =
       args
       |> Enum.with_index
       |> Enum.map(fn {arg, index} ->
@@ -180,30 +192,65 @@ defmodule Solution do
           unquote(arg) = elem(unquote(var), unquote(index) + 1)
         end
       end)
-      |> Enum.reduce(rhs, fn prefix, rhs ->
-          quote do
-            unquote(prefix)
-            unquote(rhs)
-          end
-        end)
 
-      lhs = {:"__#{tag}__", meta, [Enum.count(args) + 1]}
+      lhs = {:"__#{tag}__", meta, [Enum.count(args)]}
 
-      {lhs, rhs}
+      {lhs, prefixes ++ rhs}
   end
 
-  defp expand_case_match(other, rhs) do
+  defp expand_match(other, rhs) do
     {other, rhs}
   end
+
 
   @doc """
   Works like a normal `with`-statement,
   but will expand macros to the left side of `<-`.
   """
-  defmacro swith(statements, conditions) do
+  defmacro swith(statements, conditions)
+  defmacro swith(statement, conditions) do
+    do_swith([statement], conditions)
+  end
+
+  # Since `swith` is a normal macro bound to normal function rules,
+  # define it for all possible arities.
+  for arg_num <- (1..252) do
+    args = (0..arg_num) |> Enum.map(fn num -> Macro.var(:"statement#{num}",  __MODULE__) end)
+    @doc false
+    defmacro swith(unquote_splicing(args), conditions) do
+      do_swith(unquote(args), conditions)
+    end
+  end
+
+  defp do_swith(statements, conditions) do
+    guard_env = Map.put(__ENV__, :context, :guard)
+
+    IO.inspect(statements, label: :statements)
+    IO.inspect(conditions, label: :conditions)
+
+    statements =
+      statements
+      |> Enum.flat_map(fn node ->
+        case node do
+            {:<-, meta, [lhs, rhs]} ->
+            IO.inspect("Wooh! We encountered: #{inspect {meta, lhs, rhs}}")
+            {lhs, extra_statements} =
+              expand_match(lhs, [])
+            lhs = Macro.expand(lhs, guard_env)
+            node = {:<-, meta, [lhs, rhs]}
+
+            IO.inspect(Macro.to_string(node), label: "RESULTING NODE")
+
+            [node | extra_statements]
+          _ ->
+            [Macro.expand(node, guard_env)]
+        end
+      end)
+
     res =
-    {:with, [], [statements, conditions]}
-    |> Macro.prewalk(&Macro.expand(&1, __ENV__))
+      quote do
+        with(unquote_splicing(statements), unquote(conditions))
+      end
 
     IO.puts(Macro.to_string(res))
 
