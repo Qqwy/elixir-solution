@@ -85,7 +85,8 @@ defmodule Solution do
 
   @doc """
   Matches any ok datatype.
-  (See also `is_ok`)
+
+  (See also `is_ok/1`)
 
   Has to be used inside the LHS of a `scase` or `swith` statement.
   """
@@ -117,7 +118,8 @@ defmodule Solution do
 
   @doc """
   Matches `{:ok, res}` (as well as tuples with more elements). `res` is then bound.
-  (See also `is_ok`)
+
+  (See also `is_ok/1`)
 
   Has to be used inside the LHS of a `scase` or `swith` statement.
   """
@@ -129,7 +131,8 @@ defmodule Solution do
 
   @doc """
   Matches any error datatype.
-  (See also `is_error`)
+
+  (See also `is_error/1`)
 
   Has to be used inside the LHS of a `scase` or `swith` statement.
   """
@@ -145,7 +148,8 @@ defmodule Solution do
   end
   @doc """
   Matches `{:error, res}` (as well as tuples with more elements). `res` is then bound.
-  (See also `is_error`)
+
+  (See also `is_error/1`)
 
   Has to be used inside the LHS of a `scase` or `swith` statement.
   """
@@ -187,7 +191,8 @@ defmodule Solution do
 
   @doc """
   Matches any ok or error type. `tag` is then boudn to `:ok`, `:error` or `:undefined`.
-  (See also `is_okerror`)
+
+  (See also `is_okerror/1`)
 
   Has to be used inside the LHS of a `scase` or `swith` statement.
   """
@@ -199,7 +204,8 @@ defmodule Solution do
 
   @doc """
   Matches `{:ok, res}`, `{:error, res}` (as well as tuples with more elements). `tag` and `res` are bound.
-  (See also `is_okerror`)
+
+  (See also `is_okerror/1`)
 
   `tag` is bound to the value `:ok` or `:error` depending on the tuple.
   `res` is bound to what the second element might be.
