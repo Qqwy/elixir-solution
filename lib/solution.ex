@@ -22,7 +22,7 @@ defmodule Solution do
       iex> is_ok({:error, "failure"})
       false
   """
-  defguard is_ok(x) when x == :ok or (is_tuple(x) and tuple_size(x) > 1 and elem(x, 0) == :ok)
+  defguard is_ok(x) when x == :ok or (is_tuple(x) and tuple_size(x) >= 1 and elem(x, 0) == :ok)
 
   @doc """
   Matches when `x` is a long-enough ok-tuple that has more than `n_elems` elements.
@@ -50,7 +50,7 @@ defmodule Solution do
       iex> is_error(:undefined)
       true
   """
-  defguard is_error(x) when x == :error or (is_tuple(x) and tuple_size(x) > 1 and elem(x, 0) == :error) or x == :undefined
+  defguard is_error(x) when x == :error or (is_tuple(x) and tuple_size(x) >= 1 and elem(x, 0) == :error) or x == :undefined
 
   @doc """
   Matches when `x` is a long-enough ok-tuple that has more than `n_elems` elements.
@@ -81,7 +81,7 @@ defmodule Solution do
   Warning: Will _not_ match plain `:ok`, `:error` or `:undefined`!
   """
 
-  defguard is_okerror(x, n_elems) when (elem(x, 0) == :error or elem(x, 0) == :ok) and tuple_size(x) >= n_elems
+  defguard is_okerror(x, n_elems) when (x in [:ok, :error, :undefined] and n_elems == 0) or (is_tuple(x) and tuple_size(x) >= n_elems and elem(x, 0) in [:ok, :error])
 
   @doc """
   Matches any ok datatype.

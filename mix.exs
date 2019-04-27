@@ -7,7 +7,11 @@ defmodule Solution.MixProject do
       version: "0.1.0",
       elixir: "~> 1.8",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      elixirc_paths: elixirc_paths(Mix.env()),
+      description: description(),
+      package: package(),
+      source_url: @source_url
     ]
   end
 
@@ -21,8 +25,30 @@ defmodule Solution.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+      {:stream_data, "~> 0.1", only: :test},
+      {:ex_doc, "~> 0.19", only: [:docs], runtime: false},
+      # Inch CI documentation quality test.
+      {:inch_ex, ">= 0.0.0", only: [:docs]},
     ]
   end
+
+  defp elixirc_paths(_), do: ["lib"]
+
+  defp description do
+    """
+    A Macro-based solution to working with ok/error tuples in `case` and `with` statements.
+    """
+  end
+
+  defp package do
+    # These are the default files included in the package
+    [
+      name: :specify,
+      files: ["lib", "mix.exs", "README*", "LICENSE"],
+      maintainers: ["Wiebe-Marten Wijnja/Qqwy"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => @source_url}
+    ]
+  end
+
 end
