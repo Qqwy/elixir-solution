@@ -78,7 +78,7 @@ but will expand `ok()`, `error()` and `okerror()` macros to the left side of `<-
 iex> x = {:ok, 10}
 iex> y = {:ok, 33}
 iex> swith ok(res) <- x,
-...>    ok(res2) <- y do
+...>       ok(res2) <- y do
 ...>      "We have: \#{res} \#{res2}"
 ...>    else
 ...>      _ -> "Failure"
@@ -95,8 +95,8 @@ iex> x = {:ok, 10}
 iex> y = {:error, 33}
 iex> z = {:ok, %{a: 42}}
 iex> swith ok(res) <- x,
-...>     error(res2) <- y,
-...>     okerror(tag, metamap) <- z,
+...>       error(res2) <- y,
+...>       okerror(tag, metamap) <- z,
 ...>     %{a: val} = metamap do
 ...>       "We have: \#{res} \#{res2} \#{tag} \#{val}"
 ...>   else
