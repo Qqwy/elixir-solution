@@ -33,8 +33,8 @@ import Solution
 
 `Solution` exposes three guard-safe functions: `is_ok(x)`, `is_error(x)` and `is_okerror(x)`
 
-`ok(x)` will match `:ok`, `{:ok, _}`, `{:ok, _, _}`, `{:ok, _, _, __}` and any longer tuple whose first element is `:ok`.
-`error(x)` will match `:error`, `:undefined` `{:error, _}`, `{:error, _, _}`, `{:error, _, _, __}` and any longer tuple whose first element is `:error`.
+- `ok(x)` will match `:ok`, `{:ok, _}`, `{:ok, _, _}`, `{:ok, _, _, __}` and any longer tuple whose first element is `:ok`.
+- `error(x)` will match `:error`, `:undefined` `{:error, _}`, `{:error, _, _}`, `{:error, _, _, __}` and any longer tuple whose first element is `:error`.
 - `okerror(x)` matches both of these.
 
 Solution also exposes versions of these that take a 'minimum-length' as second argument. A length of `0` works jus the same as above versions. Longer lengths only match tuples that have at least that many elements (as well as starting with the appropriate tag).
@@ -70,7 +70,7 @@ On the other hand, for `okerror()`, the first argument will match the tag `:ok` 
 
 ### SWith
 
-Works like a normal `with`-statement,
+`Solution.swith` works like a normal `with`-statement,
 but will expand `ok()`, `error()` and `okerror()` macros to the left side of `<-`.
 
 
