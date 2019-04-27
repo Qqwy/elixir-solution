@@ -45,7 +45,7 @@ defmodule Solution.MixProject do
   defp package do
     # These are the default files included in the package
     [
-      name: :specify,
+      name: :solution,
       files: ["lib", "mix.exs", "README*", "LICENSE"],
       maintainers: ["Wiebe-Marten Wijnja/Qqwy"],
       licenses: ["MIT"],
