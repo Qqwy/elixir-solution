@@ -10,9 +10,24 @@ defmodule Solution do
   - `{:ok, _}`
   - `{:ok, _, _}`
   -  or a longer tuple where the first element is the atom `:ok`
+
+  iex> is_ok(:ok)
+  true
+  iex> is_ok({:ok, 42})
+  true
+  iex> is_ok({:ok, "I", "have", "many", "elements"})
+  true
+  iex> is_ok(:asdf)
+  false
+  iex> is_ok({:error, "failure"})
+  false
   """
   defguard is_ok(x) when x == :ok or (is_tuple(x) and elem(x, 0) == :ok)
-  defguard is_ok(x, n_elems) when elem(x, 0) == :ok and tuple_size(x) > n_elems
+
+  @doc """
+  Matches when `x` is a long-enough ok-tuple that has more than `n_elems` elements.
+  """
+  defguard is_ok(x, n_elems) when is_ok(x) and (n_elems == 0 or tuple_size(x) >= n_elems)
 
   @doc """
   Matches when `x` is one of the following:
@@ -22,14 +37,50 @@ defmodule Solution do
   - `{:error, _}`
   - `{:error, _, _}`
   -  or a longer tuple where the first element is the atom `:error`
+
+  iex> is_error(:error)
+  true
+  iex> is_error({:error, 42})
+  true
+  iex> is_error({:error, "I", "have", "many", "elements"})
+  true
+  iex> is_error(:asdf)
+  false
+  iex> is_error({:ok, "success!"})
+  iex> is_error(:undefined)
+  true
   """
   defguard is_error(x) when x == :error or (is_tuple(x) and elem(x, 0) == :error) or x == :undefined
-  defguard is_error(x, n_elems) when elem(x, 0) == :error and tuple_size(x) > n_elems
+
+  @doc """
+  Matches when `x` is a long-enough ok-tuple that has more than `n_elems` elements.
+  """
+  defguard is_error(x, n_elems) when is_error(x) and (n_elems == 0 or tuple_size(x) >= n_elems)
 
   @doc """
   Matches when either `is_ok(x)` or `is_error(x)` matches.
+
+  iex> is_okerror({:ok, "Yay!"})
+  true
+  iex> is_okerror({:error, "Nay"})
+  true
+  iex> is_okerror(false)
+  false
+  iex> is_okerror(:undefined)
+  true
+  iex> is_okerror({})
+  false
+  iex> is_okerror({:ok, "the", "quick", "brown", "fox})
+  true
   """
   defguard is_okerror(x) when is_ok(x) or is_error(x)
+
+  @doc """
+  Matches when `x` is a long-enough ok-tuple that has more than `n_elems` elements.
+
+  Warning: Will _not_ match plain `:ok`, `:error` or `:undefined`!
+  """
+
   defguard is_okerror(x, n_elems) when (elem(x, 0) == :error or elem(x, 0) == :ok) and tuple_size(x) >= n_elems
 
   @doc """
@@ -152,6 +203,26 @@ defmodule Solution do
     end
   end
 
+  # Expands to x when is_okerror(x, min_length)
+  # Used internally by `expand_match`
+  defmacro __okerror__(0) do
+    quote do
+      okerror()
+    end
+  end
+  defmacro __okerror__(min_length) do
+    guard_env = Map.put(__ENV__, :context, :guard)
+    {:when, [],
+     [
+       {:latest_solution_match____, [], nil},
+       {:is_okerror, [context: Elixir, import: Solution],
+        [{:latest_solution_match____, [], nil}, min_length]}
+     ]}
+     |> Macro.prewalk(&Macro.expand(&1, guard_env))
+  end
+
+
+
   @doc """
   Works like a normal `case`-statement,
   but will expand macros to the left side of `->`.
@@ -182,18 +253,31 @@ defmodule Solution do
     res
   end
 
-  defp expand_match(lhs = {tag, meta, args}, rhs) when tag in [:ok, :error] and is_list(args) do
+  defp expand_match(lhs = {tag, meta, args}, rhs) when tag in [:ok, :error, :okerror] and is_list(args) do
     var = Macro.var(:latest_solution_match____, nil)
+    args_amount =
+      case Enum.count(args) do
+        0 ->
+          0
+        other ->
+          other + 1
+      end
+    elem_offset =
+      case tag do
+        :okerror -> 0
+        _ -> 1
+      end
     prefixes =
       args
       |> Enum.with_index
       |> Enum.map(fn {arg, index} ->
+      full_index = index + elem_offset
         quote do
-          unquote(arg) = elem(unquote(var), unquote(index) + 1)
+          unquote(arg) = elem(unquote(var), unquote(full_index))
         end
       end)
 
-      lhs = {:"__#{tag}__", meta, [Enum.count(args)]}
+      lhs = {:"__#{tag}__", meta, [args_amount + elem_offset - 1]}
 
       {lhs, prefixes ++ rhs}
   end
