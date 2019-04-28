@@ -9,6 +9,13 @@ defmodule Solution.Enum do
 
   If all elements are oks, takes the first non-tag value from each of them for the list.
   (in the case of `:ok`, nothing is added to the resulting list.)
+
+      iex> combine([{:ok, 1}, {:ok, "a", %{meta: "this will be dropped"}}, {:ok, :asdf}])
+      {:ok, [1, "a", :asdf]}
+      iex> combine([{:ok, 1}, {:ok, 2}, {:error, 3}])
+      {:error, 3}
+      iex> combine([{:ok, 1}, {:ok, 2}, {:error, 3, 4, 5}])
+      {:error, 3, 4, 5}
   """
   def combine(enum) do
     result =
