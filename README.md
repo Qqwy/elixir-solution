@@ -14,7 +14,7 @@ You can install Solution by adding `solution` to your list of dependencies in `m
 ```elixir
 def deps do
   [
-    {:solution, "~> 0.1.0"}
+    {:solution, "~> 0.2.0"}
   ]
 end
 ```
@@ -139,5 +139,6 @@ Full documentation can be found at [https://hexdocs.pm/solution](https://hexdocs
 
 ## Changelog
 
+- 0.2.0 - the `Solution.Enum` module was added
 - 0.1.0 - Initial version
 
