@@ -408,6 +408,8 @@ defmodule Solution do
       {:error, 1,2,3}
       iex> invert_okerror({:error, "failure"})
       {:ok, "failure"}
+      iex> invert_okerror("improper datatype")
+      ** (ArgumentError) argument error
   """
   def invert_okerror(okerror) do
     case okerror do
@@ -425,6 +427,8 @@ defmodule Solution do
         x
         |> Tuple.delete_at(0)
         |> Tuple.insert_at(0, :ok)
+      _ ->
+        raise ArgumentError
     end
   end
 end
