@@ -1,6 +1,6 @@
 ![Solution](brand/logo_text.png)
 
-`Solution` is a library to help you with working with ok/error-tuples by exposing special matching macros.
+`Solution` is a library to help you with working with ok/error-tuples in `case` and `with`-expressions by exposing special matching macros, as well as some extra helper functions.
 
 [![hex.pm version](https://img.shields.io/hexpm/v/solution.svg)](https://hex.pm/packages/solution)
 [![Build Status](https://travis-ci.org/Qqwy/elixir_solution.svg?branch=master)](https://travis-ci.org/Qqwy/elixir_solution)
@@ -40,7 +40,7 @@ Clearly, a simple pattern match does not cover all of these cases. This is where
 2. It defines macros to be used inside special `case` and `with` statements that use these guards and are also able to bind variables:
 
 For instance, you might use `ok()` to match any ok-type datatype, and `error()` to match any error-type datatype.
-But they will also bind variables for you: So you can use `ok(x)` to bind `x = 42` regardless of whether `{:ok, 42}`, `{:ok, 42, "foo"}` or `{ök, 42, 3,1,4,1,5,9,2,6,5}` was passed.
+But they will also bind variables for you: So you can use `ok(x)` to bind `x = 42` regardless of whether `{:ok, 42}`, `{:ok, 42, "foo"}` or `{:ok, 42, 3,1,4,1,5,9,2,6,5}` was passed.
 
 ## Examples
 
@@ -130,6 +130,48 @@ to be used inside the rest of the `swith`-expression:
 
 Note that for `ok()` and `error()`, the first argument will match the first element after the `:ok` or `:error` tag.
 On the other hand, for `okerror()`, the first argument will match the tag `:ok` or `:error`.
+
+### Solution.Enum
+
+The `Solution.Enum` module contains helper functions to work with enumerables of ok/error tuples.
+
+
+#### combine/1
+
+Changes a list of oks into `{:ok, list_of_values}`
+
+```elixir
+ Solution.Enum.combine([{:ok, 1}, {:ok, "a", %{meta: "this will be dropped"}}, {:ok, :asdf}])
+#=> {:ok, [1, "a", :asdf]}
+Solution.Enum.combine([{:ok, 1}, {:ok, 2}, {:error, 3}])
+#=> {:error, 3}
+Solution.Enum.combine([{:ok, 1}, {:ok, 2}, {:error, 3, 4, 5}])
+#=> {:error, 3, 4, 5}
+```
+
+#### oks/1
+
+
+  Returns a list of only all `ok`-type elements in the enumerable.
+
+```elixir
+Solution.Enum.oks([{:ok, 1}, {:error, 2}, {:ok, 3}])
+#=> [{:ok, 1}, {:ok, 3}]
+```
+
+Similarly, there also exists `errors/1`
+
+#### ok_vals/1
+
+  Returns a list of the values of all `ok`-type elements in the enumerable.
+  
+```elixir
+Solution.Enum.ok_vals([{:ok, 1}, {:ok, 2,3,4,5}])
+#=> [1, 2]
+```
+
+Similarly, there also exists `error_vals/1`, as well as `ok_valstuples/1` and `error_valstuples/1`.
+
 
 
 ## Documentation
