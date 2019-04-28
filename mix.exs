@@ -57,7 +57,7 @@ defmodule Solution.MixProject do
   defp docs do
     [
       main: "readme",
-      logo: "brand/logo_text.png",
+      logo: "brand/logo_inverted.png",
       extras: ["README.md"]
     ]
   end
