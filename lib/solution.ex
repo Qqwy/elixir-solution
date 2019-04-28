@@ -6,6 +6,11 @@ defmodule Solution do
 
   1. guard-clause macros `is_ok/1`, `is_error/1` and `is_okerror/1` (as well as arity-2 variants of the same), to be used whenever you like.
   2. `scase/2` and `swith/2`, replacements for `case` and `with`-statements respectively that allow you to pattern match on ok/error tuples more effectively, as well as bind to one ore multiple of the values stored inside.
+
+
+  defmodule Stuff do
+  
+  end
   """
 
   @doc """
@@ -435,6 +440,25 @@ defmodule Solution do
         |> Tuple.insert_at(0, :ok)
       _ ->
         raise ArgumentError
+    end
+  end
+
+  @doc """
+  Turns a nillable type (that can be either `nil` or a non-nil value) into an ok/error tuple.
+
+      iex> from_nillable(nil)
+      {:error, nil}
+      iex> from_nillable(42)
+      {:ok, 42}
+      iex> (%{a: "yes!"} |> Map.get(:a) |> from_nillable())
+      {:ok, "yes!"}
+      iex> (%{a: "yes!"} |> Map.get(:b) |> from_nillable())
+      {:error, nil}
+  """
+  def from_nillable(thing) do
+    case thing do
+      nil -> {:error, nil}
+      _ -> {:ok, thing}
     end
   end
 end
