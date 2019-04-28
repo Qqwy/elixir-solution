@@ -1,4 +1,4 @@
-![Solution](brand/logo_text.png)
+![Solution](https://raw.githubusercontent.com/Qqwy/elixir_solution/master/brand/logo_text.png)
 
 `Solution` is a library to help you with working with ok/error-tuples in `case` and `with`-expressions by exposing special matching macros, as well as some extra helper functions.
 
