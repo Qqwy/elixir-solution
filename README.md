@@ -19,6 +19,29 @@ def deps do
 end
 ```
 
+## Rationale
+
+`ok/error` tuples, which are also known by [many other names](https://elixirforum.com/t/names-for-monadic-modalities/17186/5?u=qqwy) some common ones being 'Tagged Status' tuples, 'OK tuples', 'Success Tuples', 'Result tuples', 'Elixir Maybes'.
+
+Working with these types is however a bit complicated, since functions of different libraries (including different approaches in the Elixir standard library and the Erlang standard library) indicate a successful or failure result, in practice, in one of the following formats:
+
+- `{:ok, val}` when everything went well
+- `{:error reason}` when there was a failure.
+- `:ok`, when everything went well but there is no useful return value to share.
+- `:error`, when there was a failure bht there is no useful return value to share.
+- `:undefined`, used instead of `:error` by some legacy Erlang libraries and functions.
+- `{:ok, val, extra}` ends up being used by some libraries that want to return two things on success.
+- `{:error, val, extra}` ends up being used by some libraries that want to return two things on failure.
+- In general, `{:ok, ...}` or `{:error, ...}` with more elements have seen some (albeit luckily limited) use.
+
+Clearly, a simple pattern match does not cover all of these cases. This is where `Solution` comes in:
+
+1. It defines clever guard macros that match either of these groups (`is_ok(x)`, `is_error(x)`, `is_okerror(x)`)
+2. It defines macros to be used inside special `case` and `with` statements that use these guards and are also able to bind variables:
+
+For instance, you might use `ok()` to match any ok-type datatype, and `error()` to match any error-type datatype.
+But they will also bind variables for you: So you can use `ok(x)` to bind `x = 42` regardless of whether `{:ok, 42}`, `{:ok, 42, "foo"}` or `{ök, 42, 3,1,4,1,5,9,2,6,5}` was passed.
+
 ## Examples
 
 The following example snippets assume that you run 

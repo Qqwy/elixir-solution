@@ -264,6 +264,7 @@ defmodule Solution do
   Note that for `ok()` and `error()`, the first argument will match the first element after the `:ok` or `:error` tag.
   On the other hand, for `okerror()`, the first argument will match the tag `:ok` or `:error`.
 
+  Note: It is not required to import Solution to use the macros inside `swith` without prefixing them.
   """
   defmacro scase(input, conditions) do
     guard_env = Map.put(__ENV__, :context, :guard)
@@ -351,6 +352,9 @@ defmodule Solution do
 
   Note that for `ok()` and `error()`, the first argument will match the first element after the `:ok` or `:error` tag.
   On the other hand, for `okerror()`, the first argument will match the tag `:ok` or `:error`.
+
+
+  Note: It is not required to import Solution to use the macros inside `swith` without prefixing them.
   """
   defmacro swith(statements, conditions)
   defmacro swith(statement, conditions) do
@@ -389,6 +393,38 @@ defmodule Solution do
 
     quote do
       with(unquote_splicing(statements), unquote(conditions))
+    end
+  end
+
+  @doc """
+  Changes an `:ok` into an `:error`, an `{:ok, ...}` into an `{:error, ...}` and vice-versa.
+
+
+      iex> invert_okerror(:ok)
+      :error
+      iex> invert_okerror(:undefined)
+      :ok
+      iex> invert_okerror({:ok, 1,2,3})
+      {:error, 1,2,3}
+      iex> invert_okerror({:error, "failure"})
+      {:ok, "failure"}
+  """
+  def invert_okerror(okerror) do
+    case okerror do
+      :ok ->
+        :error
+      :error ->
+        :ok
+      :undefined ->
+        :ok
+      x when is_ok(x) ->
+        x
+        |> Tuple.delete_at(0)
+        |> Tuple.insert_at(0, :error)
+      x when is_error(x) ->
+        x
+        |> Tuple.delete_at(0)
+        |> Tuple.insert_at(0, :ok)
     end
   end
 end

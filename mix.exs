@@ -38,7 +38,7 @@ defmodule Solution.MixProject do
 
   defp description do
     """
-    A Macro-based solution to working with ok/error tuples in `case` and `with` statements.
+    A Macro-based solution to working with ok/error tuples (AKA result tuples, success tuples or tagged statuses) in `case` and `with` statements.
     """
   end
 
