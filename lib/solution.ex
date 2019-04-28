@@ -19,7 +19,7 @@ defmodule Solution do
   - `:ok`
   - `{:ok, _}`
   - `{:ok, _, _}`
-  -  or a longer tuple where the first element is the atom `:ok`
+  -  or a longer tuple where the first element is the atom `:ok` (`{:ok, ...}`)
 
       iex> is_ok(:ok)
       true
@@ -43,10 +43,9 @@ defmodule Solution do
   Matches when `x` is one of the following:
 
   - `:error`
-  - `:undefined`
   - `{:error, _}`
   - `{:error, _, _}`
-  -  or a longer tuple where the first element is the atom `:error`
+  -  or a longer tuple where the first element is the atom `:error`. (`{:error, ...}`)
 
       iex> is_error(:error)
       true
@@ -57,10 +56,9 @@ defmodule Solution do
       iex> is_error(:asdf)
       false
       iex> is_error({:ok, "success!"})
-      iex> is_error(:undefined)
-      true
+      false
   """
-  defguard is_error(x) when x == :error or (is_tuple(x) and tuple_size(x) >= 1 and elem(x, 0) == :error) or x == :undefined
+  defguard is_error(x) when x == :error or (is_tuple(x) and tuple_size(x) >= 1 and elem(x, 0) == :error)
 
   @doc """
   Matches when `x` is a long-enough ok-tuple that has more than `n_elems` elements.
@@ -76,8 +74,6 @@ defmodule Solution do
       true
       iex> is_okerror(false)
       false
-      iex> is_okerror(:undefined)
-      true
       iex> is_okerror({})
       false
       iex> is_okerror({:ok, "the", "quick", "brown", "fox"})
@@ -88,7 +84,7 @@ defmodule Solution do
   @doc """
   Matches when `x` is a long-enough ok-tuple that has more than `n_elems` elements.
 
-  Warning: Will _not_ match plain `:ok`, `:error` or `:undefined`!
+  Warning: Will _not_ match plain `:ok` or `:error`!
   """
 
   defguard is_okerror(x, n_elems) when is_ok(x, n_elems) or is_error(x, n_elems)
@@ -200,7 +196,7 @@ defmodule Solution do
   end
 
   @doc """
-  Matches any ok or error type. `tag` is then boudn to `:ok`, `:error` or `:undefined`.
+  Matches any ok or error type. `tag` is then bound to `:ok` or `:error`.
 
   (See also `is_okerror/1`)
 
@@ -413,8 +409,6 @@ defmodule Solution do
 
       iex> invert_okerror(:ok)
       :error
-      iex> invert_okerror(:undefined)
-      :ok
       iex> invert_okerror({:ok, 1,2,3})
       {:error, 1,2,3}
       iex> invert_okerror({:error, "failure"})
@@ -428,13 +422,11 @@ defmodule Solution do
         :error
       :error ->
         :ok
-      :undefined ->
-        :ok
-      x when is_ok(x) ->
+      x when is_ok(x, 1) ->
         x
         |> Tuple.delete_at(0)
         |> Tuple.insert_at(0, :error)
-      x when is_error(x) ->
+      x when is_error(x, 1) ->
         x
         |> Tuple.delete_at(0)
         |> Tuple.insert_at(0, :ok)
@@ -446,6 +438,8 @@ defmodule Solution do
   @doc """
   Turns a nillable type (that can be either `nil` or a non-nil value) into an ok/error tuple.
 
+  Also handles Erlang's 'nil'-type equivalent: the atom `:undefined`.
+
       iex> from_nillable(nil)
       {:error, nil}
       iex> from_nillable(42)
@@ -454,10 +448,15 @@ defmodule Solution do
       {:ok, "yes!"}
       iex> (%{a: "yes!"} |> Map.get(:b) |> from_nillable())
       {:error, nil}
+      iex> from_nillable(:undefined)
+      {:error, :undefined}
   """
   def from_nillable(thing) do
     case thing do
-      nil -> {:error, nil}
+      nil ->
+        {:error, nil}
+      :undefined ->
+        {:error, :undefined}
       _ -> {:ok, thing}
     end
   end

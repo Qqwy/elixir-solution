@@ -30,7 +30,6 @@ Working with these types is however a bit complicated, since functions of differ
 - `{:error reason}` when there was a failure.
 - `:ok`, when everything went well but there is no useful return value to share.
 - `:error`, when there was a failure bht there is no useful return value to share.
-- `:undefined`, used instead of `:error` by some legacy Erlang libraries and functions.
 - `{:ok, val, extra}` ends up being used by some libraries that want to return two things on success.
 - `{:error, val, extra}` ends up being used by some libraries that want to return two things on failure.
 - In general, `{:ok, ...}` or `{:error, ...}` with more elements have seen some (albeit luckily limited) use.
@@ -58,7 +57,7 @@ import Solution
 `Solution` exposes three guard-safe functions: `is_ok(x)`, `is_error(x)` and `is_okerror(x)`
 
 - `ok(x)` will match `:ok`, `{:ok, _}`, `{:ok, _, _}`, `{:ok, _, _, __}` and any longer tuple whose first element is `:ok`.
-- `error(x)` will match `:error`, `:undefined` `{:error, _}`, `{:error, _, _}`, `{:error, _, _, __}` and any longer tuple whose first element is `:error`.
+- `error(x)` will match `:error`,  `{:error, _}`, `{:error, _, _}`, `{:error, _, _, __}` and any longer tuple whose first element is `:error`.
 - `okerror(x)` matches both of these.
 
 Solution also exposes versions of these that take a 'minimum-length' as second argument. A length of `0` works jus the same as above versions. Longer lengths only match tuples that have at least that many elements (as well as starting with the appropriate tag).
@@ -132,6 +131,13 @@ to be used inside the rest of the `swith`-expression:
 Note that for `ok()` and `error()`, the first argument will match the first element after the `:ok` or `:error` tag.
 On the other hand, for `okerror()`, the first argument will match the tag `:ok` or `:error`.
 
+### Converting from Nillable types
+
+When functions return a value that can never be the atom `nil`, they often represent error by returning `nil`.
+Erlang also has its own equivalent of `nil` that is used in many places in the Erlang standard library and other Erlang libraries: `:undefined`.
+
+`Solution.from_nillable(thing)` can be used to convert these types into either `{:ok, thing}` if `thing` is  `nil` nor `:undefined`, and into `{:error, nil}` or `{:error, :undefined}` otherwise.
+
 ### Solution.Enum
 
 The `Solution.Enum` module contains helper functions to work with enumerables of ok/error tuples.
@@ -182,6 +188,7 @@ Full documentation can be found at [https://hexdocs.pm/solution](https://hexdocs
 
 ## Changelog
 
+- 0.2.1 - Proper handling of `:undefined` (like `nil`).
 - 0.2.0 - the `Solution.Enum` module was added
 - 0.1.0 - Initial version
 

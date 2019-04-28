@@ -16,7 +16,6 @@ defmodule SolutionTest do
 
   def error_generator do
     StreamData.one_of([:error,
-                       :undefined,
                        StreamData.list_of(StreamData.term())
                        |> StreamData.map(fn list -> :erlang.list_to_tuple([:error | list]) end)
                       ])
