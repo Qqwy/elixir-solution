@@ -13,7 +13,8 @@ defmodule Solution.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       description: description(),
       package: package(),
-      source_url: @source_url
+      source_url: @source_url,
+      docs: docs()
     ]
   end
 
@@ -52,4 +53,13 @@ defmodule Solution.MixProject do
       links: %{"GitHub" => @source_url}
     ]
   end
+
+  defp docs do
+    [
+      main: "readme",
+      logo: "brand/logo_text.png",
+      extras: ["README.md"]
+    ]
+  end
+
 end

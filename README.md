@@ -36,11 +36,11 @@ Working with these types is however a bit complicated, since functions of differ
 
 Clearly, a simple pattern match does not cover all of these cases. This is where `Solution` comes in:
 
-1. It defines clever guard macros that match either of these groups (`is_ok(x)`, `is_error(x)`, `is_okerror(x)`)
+1. It defines clever guard macros that match either of these groups (`Solution.is_ok/1`, `Solution.is_error/1`, `Solution.is_okerror/1`)
 2. It defines macros to be used inside special `case` and `with` statements that use these guards and are also able to bind variables:
 
-For instance, you might use `ok()` to match any ok-type datatype, and `error()` to match any error-type datatype.
-But they will also bind variables for you: So you can use `ok(x)` to bind `x = 42` regardless of whether `{:ok, 42}`, `{:ok, 42, "foo"}` or `{:ok, 42, 3,1,4,1,5,9,2,6,5}` was passed.
+For instance, you might use `Solution.ok/0` to match any ok-type datatype, and `Solution.error/0` to match any error-type datatype.
+But they will also bind variables for you: So you can use `ok(x)` to bind `x = 42` regardless of whether `{:ok, 42}`, `{:ok, 42, "foo"}` or `{:ok, 42, 3,1,4,1,5,9,2,6,5}` was passed. Higher-arity forms like `ok(x, y, z)` also exist.
 
 ## Examples
 
@@ -56,15 +56,15 @@ import Solution
 
 `Solution` exposes three guard-safe functions: `is_ok(x)`, `is_error(x)` and `is_okerror(x)`
 
-- `ok(x)` will match `:ok`, `{:ok, _}`, `{:ok, _, _}`, `{:ok, _, _, __}` and any longer tuple whose first element is `:ok`.
-- `error(x)` will match `:error`,  `{:error, _}`, `{:error, _, _}`, `{:error, _, _, __}` and any longer tuple whose first element is `:error`.
-- `okerror(x)` matches both of these.
+- `Solution.is_ok/1` will match `:ok`, `{:ok, _}`, `{:ok, _, _}`, `{:ok, _, _, __}` and any longer tuple whose first element is `:ok`.
+- `Solution.is_error/1` will match `:error`,  `{:error, _}`, `{:error, _, _}`, `{:error, _, _, __}` and any longer tuple whose first element is `:error`.
+- `Solution.is_okerror/1` matches both of these.
 
 Solution also exposes versions of these that take a 'minimum-length' as second argument. A length of `0` works jus the same as above versions. Longer lengths only match tuples that have at least that many elements (as well as starting with the appropriate tag).
 
 ### SCase
 
-`Solution.scase`works like a normal `case`-statement,
+`Solution.scase/2`works like a normal `case`-statement,
 but will expand `ok()`, `error()` and `okerror()`macros to the left side of `->`.
 
 ```elixir
@@ -88,12 +88,12 @@ to be used inside the case expression:
 #=> "result: foo, extra: 42"
 ```
 
-Note that for `ok()` and `error()`, the first argument will match the first element after the `:ok` or `:error` tag.
-On the other hand, for `okerror()`, the first argument will match the tag `:ok` or `:error`.
+Note that for `ok(...)` and `error(...)`, the first argument will match the first element after the `:ok` or `:error` tag.
+On the other hand, for `okerror(...)`, the first argument will match the tag `:ok` or `:error`.
 
 ### SWith
 
-`Solution.swith` works like a normal `with`-statement,
+`Solution.swith/2` works like a normal `with`-statement,
 but will expand `ok()`, `error()` and `okerror()` macros to the left side of `<-`.
 
 
@@ -128,22 +128,22 @@ to be used inside the rest of the `swith`-expression:
 #=> "We have: 10 33 ok 42"
 ```
 
-Note that for `ok()` and `error()`, the first argument will match the first element after the `:ok` or `:error` tag.
-On the other hand, for `okerror()`, the first argument will match the tag `:ok` or `:error`.
+Note that for `ok(...)` and `error(...)`, the first argument will match the first element after the `:ok` or `:error` tag.
+On the other hand, for `okerror(...)`, the first argument will match the tag `:ok` or `:error`.
 
 ### Converting from Nillable types
 
 When functions return a value that can never be the atom `nil`, they often represent error by returning `nil`.
 Erlang also has its own equivalent of `nil` that is used in many places in the Erlang standard library and other Erlang libraries: `:undefined`.
 
-`Solution.from_nillable(thing)` can be used to convert these types into either `{:ok, thing}` if `thing` is  `nil` nor `:undefined`, and into `{:error, nil}` or `{:error, :undefined}` otherwise.
+`Solution.from_nillable/1` can be used to convert these types into either `{:ok, thing}` if `thing` is  `nil` nor `:undefined`, and into `{:error, nil}` or `{:error, :undefined}` otherwise.
 
 ### Solution.Enum
 
 The `Solution.Enum` module contains helper functions to work with enumerables of ok/error tuples.
 
 
-#### combine/1
+#### `Solution.Enum.combine/1`
 
 Changes a list of oks into `{:ok, list_of_values}`
 
@@ -156,7 +156,7 @@ Solution.Enum.combine([{:ok, 1}, {:ok, 2}, {:error, 3, 4, 5}])
 #=> {:error, 3, 4, 5}
 ```
 
-#### oks/1
+#### `Solution.Enum.oks/1`
 
 
   Returns a list of only all `ok`-type elements in the enumerable.
@@ -168,7 +168,7 @@ Solution.Enum.oks([{:ok, 1}, {:error, 2}, {:ok, 3}])
 
 Similarly, there also exists `errors/1`
 
-#### ok_vals/1
+#### `Solution.Enum.ok_vals/1`
 
   Returns a list of the values of all `ok`-type elements in the enumerable.
   
@@ -177,7 +177,7 @@ Solution.Enum.ok_vals([{:ok, 1}, {:ok, 2,3,4,5}])
 #=> [1, 2]
 ```
 
-Similarly, there also exists `error_vals/1`, as well as `ok_valstuples/1` and `error_valstuples/1`.
+Similarly, there also exists `Solution.Enum.error_vals/1`, as well as `Solution.Enum.ok_valstuples/1` and `Solution.Enum.error_valstuples/1`.
 
 
 
