@@ -1,6 +1,11 @@
 defmodule Solution do
   @moduledoc """
   A Macro-based approach to working with ok/error tuples
+
+  This module exposes two main things:
+
+  1. guard-clause macros `is_ok/1`, `is_error/1` and `is_okerror/1` (as well as arity-2 variants of the same), to be used whenever you like.
+  2. `scase/2` and `swith/2`, replacements for `case` and `with`-statements respectively that allow you to pattern match on ok/error tuples more effectively, as well as bind to one ore multiple of the values stored inside.
   """
 
   @doc """

@@ -1,4 +1,8 @@
 defmodule Solution.Enum do
+  @moduledoc """
+  Helper functions to work with ok/error tuples in Enumerables.
+  """
+
   require Solution
   import Solution
 
