@@ -4,6 +4,7 @@
 
 [![hex.pm version](https://img.shields.io/hexpm/v/solution.svg)](https://hex.pm/packages/solution)
 [![Build Status](https://travis-ci.org/Qqwy/elixir_solution.svg?branch=master)](https://travis-ci.org/Qqwy/elixir_solution)
+[![Documentation](https://img.shields.io/badge/hexdocs-latest-blue.svg)](https://hexdocs.pm/solution/index.html)
 [![Inline docs](http://inch-ci.org/github/qqwy/elixir_solution.svg)](http://inch-ci.org/github/qqwy/elixir_solution)
 
 
