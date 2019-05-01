@@ -26,8 +26,10 @@ defmodule Solution.Enum do
       Enum.reduce_while(enum, [], fn
         x, acc when is_ok(x, 2) ->
           {:cont, [elem(x, 1) | acc]}
+
         x, acc when is_ok(x, 0) or is_ok(x, 1) ->
           {:cont, acc}
+
         x, _acc when is_error(x) ->
           {:halt, x}
       end)

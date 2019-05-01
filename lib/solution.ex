@@ -54,7 +54,8 @@ defmodule Solution do
       iex> is_error({:ok, "success!"})
       false
   """
-  defguard is_error(x) when x == :error or (is_tuple(x) and tuple_size(x) >= 1 and elem(x, 0) == :error)
+  defguard is_error(x)
+           when x == :error or (is_tuple(x) and tuple_size(x) >= 1 and elem(x, 0) == :error)
 
   @doc """
   Matches when `x` is a long-enough ok-tuple that has more than `n_elems` elements.
@@ -94,29 +95,28 @@ defmodule Solution do
   """
   defmacro ok() do
     guard_env = Map.put(__ENV__, :context, :guard)
+
     {:when, [],
      [
        {:latest_solution_match____, [], nil},
-       {:is_ok, [context: Elixir, import: Solution],
-        [{:latest_solution_match____, [], nil}]}
+       {:is_ok, [context: Elixir, import: Solution], [{:latest_solution_match____, [], nil}]}
      ]}
-     |> Macro.prewalk(&Macro.expand(&1, guard_env))
-
+    |> Macro.prewalk(&Macro.expand(&1, guard_env))
   end
 
   # Expands to x when is_ok(x, min_length)
   # Used internally by `expand_match`
   defmacro __ok__(min_length) do
     guard_env = Map.put(__ENV__, :context, :guard)
+
     {:when, [],
      [
        {:latest_solution_match____, [], nil},
        {:is_ok, [context: Elixir, import: Solution],
         [{:latest_solution_match____, [], nil}, min_length]}
      ]}
-     |> Macro.prewalk(&Macro.expand(&1, guard_env))
+    |> Macro.prewalk(&Macro.expand(&1, guard_env))
   end
-
 
   @doc """
   Matches `{:ok, res}` (as well as tuples with more elements). `res` is then bound.
@@ -140,14 +140,15 @@ defmodule Solution do
   """
   defmacro error() do
     guard_env = Map.put(__ENV__, :context, :guard)
+
     {:when, [],
      [
        {:latest_solution_match____, [], nil},
-       {:is_error, [context: Elixir, import: Solution],
-        [{:latest_solution_match____, [], nil}]}
+       {:is_error, [context: Elixir, import: Solution], [{:latest_solution_match____, [], nil}]}
      ]}
-     |> Macro.prewalk(&Macro.expand(&1, guard_env))
+    |> Macro.prewalk(&Macro.expand(&1, guard_env))
   end
+
   @doc """
   Matches `{:error, res}` (as well as tuples with more elements). `res` is then bound.
 
@@ -159,20 +160,20 @@ defmodule Solution do
     quote do
       {:error, unquote(res)}
     end
-
   end
 
   # Expands to x when is_error(x, min_length)
   # Used internally by `expand_match`
   defmacro __error__(min_length) do
     guard_env = Map.put(__ENV__, :context, :guard)
+
     {:when, [],
      [
        {:latest_solution_match____, [], nil},
        {:is_error, [context: Elixir, import: Solution],
         [{:latest_solution_match____, [], nil}, min_length]}
      ]}
-     |> Macro.prewalk(&Macro.expand(&1, guard_env))
+    |> Macro.prewalk(&Macro.expand(&1, guard_env))
   end
 
   @doc """
@@ -182,13 +183,13 @@ defmodule Solution do
   """
   defmacro okerror() do
     guard_env = Map.put(__ENV__, :context, :guard)
+
     {:when, [],
      [
        {:latest_solution_match____, [], nil},
-       {:is_okerror, [context: Elixir, import: Solution],
-        [{:latest_solution_match____, [], nil}]}
+       {:is_okerror, [context: Elixir, import: Solution], [{:latest_solution_match____, [], nil}]}
      ]}
-     |> Macro.prewalk(&Macro.expand(&1, guard_env))
+    |> Macro.prewalk(&Macro.expand(&1, guard_env))
   end
 
   @doc """
@@ -218,9 +219,7 @@ defmodule Solution do
     quote do
       {unquote(tag), unquote(res)} when unquote(tag) in [:ok, :error]
     end
-
   end
-
 
   # Expands to x when is_okerror(x, min_length)
   # Used internally by `expand_match`
@@ -229,18 +228,18 @@ defmodule Solution do
       okerror()
     end
   end
+
   defmacro __okerror__(min_length) do
     guard_env = Map.put(__ENV__, :context, :guard)
+
     {:when, [],
      [
        {:latest_solution_match____, [], nil},
        {:is_okerror, [context: Elixir, import: Solution],
         [{:latest_solution_match____, [], nil}, min_length]}
      ]}
-     |> Macro.prewalk(&Macro.expand(&1, guard_env))
+    |> Macro.prewalk(&Macro.expand(&1, guard_env))
   end
-
-
 
   @doc """
   Works like a normal `case`-statement,
@@ -278,30 +277,34 @@ defmodule Solution do
         {:->, meta, [[lhs], rhs]} ->
           {lhs, rhs_list} = expand_match(lhs, [rhs])
           rhs = {:__block__, [], rhs_list}
-        node = {:->, meta, [[lhs], rhs]}
-        Macro.expand(node, guard_env)
+          node = {:->, meta, [[lhs], rhs]}
+          Macro.expand(node, guard_env)
+
         _ ->
           Macro.expand(node, guard_env)
       end
     end)
   end
 
-  defp expand_match({tag, meta, args}, rhs) when tag in [:ok, :error, :okerror] and is_list(args) do
+  defp expand_match({tag, meta, args}, rhs)
+       when tag in [:ok, :error, :okerror] and is_list(args) do
     var = Macro.var(:latest_solution_match____, nil)
     args_amount = args_amount(args)
+
     prefixes =
       args
-      |> Enum.with_index
+      |> Enum.with_index()
       |> Enum.map(fn {arg, index} ->
-      full_index = index + elem_offset(tag)
+        full_index = index + elem_offset(tag)
+
         quote do
           unquote(arg) = elem(unquote(var), unquote(full_index))
         end
       end)
 
-      lhs = {:"__#{tag}__", meta, [max(args_amount + elem_offset(tag) - 1, 0)]}
+    lhs = {:"__#{tag}__", meta, [max(args_amount + elem_offset(tag) - 1, 0)]}
 
-      {lhs, prefixes ++ rhs}
+    {lhs, prefixes ++ rhs}
   end
 
   defp expand_match(other, rhs) do
@@ -309,17 +312,17 @@ defmodule Solution do
   end
 
   defp args_amount(args) do
-      case Enum.count(args) do
-        0 ->
-          0
-        other ->
-          other + 1
-      end
+    case Enum.count(args) do
+      0 ->
+        0
+
+      other ->
+        other + 1
+    end
   end
 
   defp elem_offset(:okerror), do: 0
   defp elem_offset(_), do: 1
-
 
   @doc """
   Works like a normal `with`-statement,
@@ -360,14 +363,15 @@ defmodule Solution do
   Note: It is not required to import Solution to use the macros inside `swith` without prefixing them.
   """
   defmacro swith(statements, conditions)
+
   defmacro swith(statement, conditions) do
     do_swith([statement], conditions)
   end
 
   # Since `swith` is a normal macro bound to normal function rules,
   # define it for all possible arities.
-  for arg_num <- (1..252) do
-    args = (0..arg_num) |> Enum.map(fn num -> Macro.var(:"statement#{num}",  __MODULE__) end)
+  for arg_num <- 1..252 do
+    args = 0..arg_num |> Enum.map(fn num -> Macro.var(:"statement#{num}", __MODULE__) end)
     @doc false
     defmacro swith(unquote_splicing(args), conditions) do
       do_swith(unquote(args), conditions)
@@ -377,18 +381,17 @@ defmodule Solution do
   defp do_swith(statements, conditions) do
     guard_env = Map.put(__ENV__, :context, :guard)
 
-
     statements =
       statements
       |> Enum.flat_map(fn node ->
         case node do
-            {:<-, meta, [lhs, rhs]} ->
-            {lhs, extra_statements} =
-              expand_match(lhs, [])
+          {:<-, meta, [lhs, rhs]} ->
+            {lhs, extra_statements} = expand_match(lhs, [])
             lhs = Macro.expand(lhs, guard_env)
             node = {:<-, meta, [lhs, rhs]}
 
             [node | extra_statements]
+
           _ ->
             [Macro.expand(node, guard_env)]
         end
@@ -416,16 +419,20 @@ defmodule Solution do
     case okerror do
       :ok ->
         :error
+
       :error ->
         :ok
+
       x when is_ok(x, 1) ->
         x
         |> Tuple.delete_at(0)
         |> Tuple.insert_at(0, :error)
+
       x when is_error(x, 1) ->
         x
         |> Tuple.delete_at(0)
         |> Tuple.insert_at(0, :ok)
+
       _ ->
         raise ArgumentError
     end
@@ -451,9 +458,12 @@ defmodule Solution do
     case thing do
       nil ->
         {:error, nil}
+
       :undefined ->
         {:error, :undefined}
-      _ -> {:ok, thing}
+
+      _ ->
+        {:ok, thing}
     end
   end
 end

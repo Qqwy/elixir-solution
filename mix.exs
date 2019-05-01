@@ -31,7 +31,7 @@ defmodule Solution.MixProject do
       {:stream_data, "~> 0.1", only: :test},
       {:ex_doc, "~> 0.19", only: [:docs], runtime: false},
       # Inch CI documentation quality test.
-      {:inch_ex, ">= 0.0.0", only: [:docs]},
+      {:inch_ex, ">= 0.0.0", only: [:docs]}
     ]
   end
 
@@ -61,5 +61,4 @@ defmodule Solution.MixProject do
       extras: ["README.md"]
     ]
   end
-
 end
