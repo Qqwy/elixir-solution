@@ -6,7 +6,7 @@ defmodule Solution.MixProject do
   def project do
     [
       app: :solution,
-      version: "0.2.1",
+      version: "1.0.0",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -39,7 +39,7 @@ defmodule Solution.MixProject do
 
   defp description do
     """
-    A Macro-based solution to working with ok/error tuples (AKA result tuples, success tuples or tagged statuses) in `case` and `with` statements.
+    A Macro-based solution to working with ok/error tuples (AKA result tuples, success tuples or tagged statuses) in `case` and `with` statements and in collections.
     """
   end
 

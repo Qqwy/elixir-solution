@@ -188,6 +188,7 @@ Full documentation can be found at [https://hexdocs.pm/solution](https://hexdocs
 
 ## Changelog
 
+- 1.0.0 - Release of stable version. No API changes since last version.
 - 0.2.1 - Proper handling of `:undefined` (like `nil`).
 - 0.2.0 - the `Solution.Enum` module was added
 - 0.1.0 - Initial version
