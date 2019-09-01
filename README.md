@@ -3,8 +3,7 @@
 `Solution` is a library to help you with working with ok/error-tuples in `case` and `with`-expressions by exposing special matching macros, as well as some extra helper functions.
 
 [![hex.pm version](https://img.shields.io/hexpm/v/solution.svg)](https://hex.pm/packages/solution)
-[![Build Status](https://travis-ci.org/Qqwy/elixir_solution.svg?branch=master)](https://travis-ci.org/Qqwy/elixir_solution)
-[![Documentation](https://img.shields.io/badge/hexdocs-latest-blue.svg)](https://hexdocs.pm/solution/index.html)
+[![Build Status](https://travis-ci.org/Qqwy/elixir-solution.svg?branch=master)](https://travis-ci.org/Qqwy/elixir-solution)[![Documentation](https://img.shields.io/badge/hexdocs-latest-blue.svg)](https://hexdocs.pm/solution/index.html)
 [![Inline docs](http://inch-ci.org/github/qqwy/elixir_solution.svg)](http://inch-ci.org/github/qqwy/elixir_solution)
 
 
