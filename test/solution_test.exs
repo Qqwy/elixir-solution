@@ -6,6 +6,9 @@ defmodule SolutionTest do
   require Solution
 
   doctest Solution
+  doctest ShortCircuitingPipe
+  require ShortCircuitingPipe
+  import ShortCircuitingPipe
 
   def ok_generator do
     StreamData.one_of([
