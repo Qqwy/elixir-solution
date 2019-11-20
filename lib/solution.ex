@@ -276,12 +276,13 @@ defmodule Solution do
       case node do
         {:->, meta, [[lhs], rhs]} ->
           {lhs, rhs_list} = expand_match(lhs, [rhs])
+          lhs = Macro.expand(lhs, guard_env)
           rhs = {:__block__, [], rhs_list}
           node = {:->, meta, [[lhs], rhs]}
           Macro.expand(node, guard_env)
 
-        _ ->
-          Macro.expand(node, guard_env)
+        other ->
+          Macro.expand(other, __CALLER__)
       end
     end)
   end
