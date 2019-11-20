@@ -366,7 +366,7 @@ defmodule Solution do
   defmacro swith(statements, conditions)
 
   defmacro swith(statement, conditions) do
-    do_swith([statement], conditions)
+    do_swith([statement], conditions, __CALLER__)
   end
 
   # Since `swith` is a normal macro bound to normal function rules,
@@ -375,11 +375,11 @@ defmodule Solution do
     args = 0..arg_num |> Enum.map(fn num -> Macro.var(:"statement#{num}", __MODULE__) end)
     @doc false
     defmacro swith(unquote_splicing(args), conditions) do
-      do_swith(unquote(args), conditions)
+      do_swith(unquote(args), conditions, __CALLER__)
     end
   end
 
-  defp do_swith(statements, conditions) do
+  defp do_swith(statements, conditions, caller_env) do
     guard_env = Map.put(__ENV__, :context, :guard)
 
     statements =
@@ -393,8 +393,8 @@ defmodule Solution do
 
             [node | extra_statements]
 
-          _ ->
-            [Macro.expand(node, guard_env)]
+          other ->
+            [Macro.expand(other, caller_env)]
         end
       end)
 
