@@ -187,6 +187,8 @@ Full documentation can be found at [https://hexdocs.pm/solution](https://hexdocs
 
 ## Changelog
 
+- 1.0.2 - A slight typographic fix in the documentation. Thank you, @dwmcc!
+- 1.0.1 - Bugfix where certain macros were expanded in the incorrect calling context.
 - 1.0.0 - Release of stable version. No API changes since last version.
 - 0.2.1 - Proper handling of `:undefined` (like `nil`).
 - 0.2.0 - the `Solution.Enum` module was added
