@@ -28,7 +28,7 @@ Working with these types is however a bit complicated, since functions of differ
 - `{:ok, val}` when everything went well
 - `{:error reason}` when there was a failure.
 - `:ok`, when everything went well but there is no useful return value to share.
-- `:error`, when there was a failure bht there is no useful return value to share.
+- `:error`, when there was a failure but there is no useful return value to share.
 - `{:ok, val, extra}` ends up being used by some libraries that want to return two things on success.
 - `{:error, val, extra}` ends up being used by some libraries that want to return two things on failure.
 - In general, `{:ok, ...}` or `{:error, ...}` with more elements have seen some (albeit luckily limited) use.
